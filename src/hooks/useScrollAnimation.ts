@@ -30,7 +30,22 @@ const useScrollAnimation = (): void => {
 
     elements.forEach((element) => observer.observe(element));
 
+    // Safety net: guarantee anything already in the viewport is revealed even
+    // if the observer's first callback is delayed (e.g. during a navigation),
+    // so content can never stay stuck hidden against the dark background.
+    const revealInView = () => {
+      const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+      elements.forEach((element) => {
+        const rect = element.getBoundingClientRect();
+        if (rect.top < viewportHeight && rect.bottom > 0) {
+          element.classList.add('is-visible');
+        }
+      });
+    };
+    const rafId = window.requestAnimationFrame(revealInView);
+
     return () => {
+      window.cancelAnimationFrame(rafId);
       observer.disconnect();
     };
   }, []);
