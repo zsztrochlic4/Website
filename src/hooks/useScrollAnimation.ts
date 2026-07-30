@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-const useScrollAnimation = (): void => {
+const useScrollAnimation = (routeKey?: unknown): void => {
   useEffect(() => {
     const root = document.documentElement;
     const elements = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'));
@@ -48,7 +48,7 @@ const useScrollAnimation = (): void => {
       window.cancelAnimationFrame(rafId);
       observer.disconnect();
     };
-  }, []);
+  }, [routeKey]);
 };
 
 export default useScrollAnimation;

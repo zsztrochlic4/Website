@@ -1,3 +1,4 @@
+import { useEffect, useState, type ReactNode } from "react";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import StatsBanner from "./components/StatsBanner";
@@ -13,97 +14,163 @@ import NotFound from "./components/NotFound";
 import StickyMobileCta from "./components/StickyMobileCta";
 import useScrollAnimation from "./hooks/useScrollAnimation";
 
+const normalizePath = (pathname: string) => pathname.replace(/\/+$/, '') || '/';
+
+function renderPage(path: string): { title: string; node: ReactNode } {
+  switch (path) {
+    case '/privacy':
+      return {
+        title: 'Privacy Policy | StrengthHub Online',
+        node: (
+          <>
+            <Navbar />
+            <PrivacyPolicy />
+            <Footer />
+          </>
+        ),
+      };
+    case '/platform':
+      return {
+        title: 'Platform | StrengthHub Online',
+        node: (
+          <>
+            <Navbar />
+            <main className="pt-[72px]">
+              <UniqueAbout />
+              <Process />
+              <ContactForm />
+            </main>
+            <Footer />
+            <StickyMobileCta />
+          </>
+        ),
+      };
+    case '/universities':
+      return {
+        title: 'For Universities & Organisations | StrengthHub Online',
+        node: (
+          <>
+            <Navbar />
+            <main className="pt-[72px]">
+              <TheStudio />
+              <ContactForm />
+            </main>
+            <Footer />
+            <StickyMobileCta />
+          </>
+        ),
+      };
+    case '/about':
+      return {
+        title: 'Our Story | StrengthHub Online',
+        node: (
+          <>
+            <Navbar />
+            <main className="pt-[72px]">
+              <MeetTheCoach />
+              <ContactForm />
+            </main>
+            <Footer />
+            <StickyMobileCta />
+          </>
+        ),
+      };
+    case '/':
+      return {
+        title: 'StrengthHub Online | Young Adult Fitness & Wellbeing Platform',
+        node: (
+          <>
+            <Navbar />
+            <Hero />
+            <StatsBanner />
+            <HomeSections />
+            <ContactForm />
+            <Footer />
+            <StickyMobileCta />
+          </>
+        ),
+      };
+    default:
+      return {
+        title: 'Page not found | StrengthHub Online',
+        node: (
+          <>
+            <Navbar />
+            <div className="pt-[72px]">
+              <NotFound />
+            </div>
+            <Footer />
+          </>
+        ),
+      };
+  }
+}
+
 function App() {
-  useScrollAnimation();
+  const [path, setPath] = useState(() => normalizePath(window.location.pathname));
 
-  const path = window.location.pathname.replace(/\/+$/, '') || '/';
+  // Re-run the scroll reveal for each route so newly mounted content animates in.
+  useScrollAnimation(path);
 
-  if (path === '/privacy') {
-    document.title = 'Privacy Policy | StrengthHub Online';
+  useEffect(() => {
+    const syncFromLocation = () => setPath(normalizePath(window.location.pathname));
 
-    return (
-      <div className="page-enter min-h-screen">
-        <Navbar />
-        <PrivacyPolicy />
-        <Footer />
-      </div>
-    );
-  }
+    // Intercept internal link clicks and navigate client-side (no full reload),
+    // which removes the black loading gap on mobile. External links, new-tab
+    // links, downloads and in-page hash links keep their default behaviour.
+    const handleClick = (event: MouseEvent) => {
+      if (
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      ) {
+        return;
+      }
 
-  if (path === '/platform') {
-    document.title = 'Platform | StrengthHub Online';
+      const anchor = (event.target as HTMLElement | null)?.closest?.('a');
+      if (!anchor) return;
 
-    return (
-      <div className="page-enter min-h-screen">
-        <Navbar />
-        <main className="pt-[72px]">
-          <UniqueAbout />
-          <Process />
-          <ContactForm />
-        </main>
-        <Footer />
-        <StickyMobileCta />
-      </div>
-    );
-  }
+      const href = anchor.getAttribute('href');
+      if (
+        !href ||
+        !href.startsWith('/') ||
+        href.includes('#') ||
+        anchor.getAttribute('target') === '_blank' ||
+        anchor.hasAttribute('download')
+      ) {
+        return;
+      }
 
-  if (path === '/universities') {
-    document.title = 'For Universities & Organisations | StrengthHub Online';
+      event.preventDefault();
+      const next = normalizePath(href);
+      if (next !== normalizePath(window.location.pathname)) {
+        window.history.pushState({}, '', href);
+      }
+      setPath(next);
+      window.scrollTo(0, 0);
+    };
 
-    return (
-      <div className="page-enter min-h-screen">
-        <Navbar />
-        <main className="pt-[72px]">
-          <TheStudio />
-          <ContactForm />
-        </main>
-        <Footer />
-        <StickyMobileCta />
-      </div>
-    );
-  }
+    window.addEventListener('popstate', syncFromLocation);
+    document.addEventListener('click', handleClick);
+    return () => {
+      window.removeEventListener('popstate', syncFromLocation);
+      document.removeEventListener('click', handleClick);
+    };
+  }, []);
 
-  if (path === '/about') {
-    document.title = 'Our Story | StrengthHub Online';
+  const { title, node } = renderPage(path);
 
-    return (
-      <div className="page-enter min-h-screen">
-        <Navbar />
-        <main className="pt-[72px]">
-          <MeetTheCoach />
-          <ContactForm />
-        </main>
-        <Footer />
-        <StickyMobileCta />
-      </div>
-    );
-  }
+  useEffect(() => {
+    document.title = title;
+  }, [title]);
 
-  if (path !== '/') {
-    document.title = 'Page not found | StrengthHub Online';
-
-    return (
-      <div className="page-enter min-h-screen">
-        <Navbar />
-        <div className="pt-[72px]">
-          <NotFound />
-        </div>
-        <Footer />
-      </div>
-    );
-  }
-
-  document.title = 'StrengthHub Online | Young Adult Fitness & Wellbeing Platform';
-
+  // key={path} remounts the page so the content-fade animation replays per route.
   return (
-    <div className="page-enter min-h-screen">
-      <Navbar />
-      <Hero />
-      <StatsBanner />
-      <HomeSections />
-      <ContactForm />
-      <Footer />
-      <StickyMobileCta />
+    <div key={path} className="page-enter min-h-screen">
+      {node}
     </div>
   );
 }
