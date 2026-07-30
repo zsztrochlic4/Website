@@ -1,0 +1,322 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+    background: #0a0a0b;
+  }
+
+  section[id] {
+    scroll-margin-top: 72px;
+  }
+
+  body {
+    margin: 0;
+    overflow-x: hidden;
+    background: #0a0a0b;
+    color: #fff;
+    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  button,
+  a {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  button:focus-visible,
+  a:focus-visible {
+    outline: 2px solid #7ed957;
+    outline-offset: 3px;
+  }
+
+  ::selection {
+    background: rgba(126, 217, 87, 0.28);
+    color: #fff;
+  }
+}
+
+@layer components {
+  .container {
+    @apply mx-auto w-full max-w-[1280px] px-5 sm:px-7 lg:px-10;
+  }
+
+  .eyebrow {
+    @apply text-[11px] font-bold uppercase tracking-[0.24em] text-[#7ED957];
+  }
+
+  .section-heading {
+    @apply max-w-4xl text-3xl font-black leading-[1.04] tracking-[-0.05em] text-white sm:text-5xl lg:text-[3.55rem];
+  }
+
+  .section-copy {
+    @apply max-w-2xl text-base leading-relaxed text-white/[0.52] sm:text-lg;
+  }
+
+  .page-enter {
+    animation: content-fade 320ms ease both;
+  }
+
+  .motion-ready [data-reveal] {
+    opacity: 0;
+    transform: translate3d(0, 24px, 0);
+    transition:
+      opacity 650ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 650ms cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, transform;
+  }
+
+  .motion-ready [data-reveal="scale"] {
+    transform: translate3d(0, 18px, 0) scale(0.97);
+  }
+
+  .motion-ready [data-reveal="left"] {
+    transform: translate3d(-24px, 0, 0);
+  }
+
+  .motion-ready [data-reveal="right"] {
+    transform: translate3d(24px, 0, 0);
+  }
+
+  .motion-ready [data-reveal].is-visible {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    will-change: auto;
+  }
+
+  .motion-ready [data-delay="1"] {
+    transition-delay: 80ms;
+  }
+
+  .motion-ready [data-delay="2"] {
+    transition-delay: 160ms;
+  }
+
+  .motion-ready [data-delay="3"] {
+    transition-delay: 240ms;
+  }
+
+  .screen-swap {
+    animation: screen-swap 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .screen-copy-enter {
+    animation: screen-copy-enter 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .device-frame {
+    @apply relative overflow-hidden border border-white/15 bg-[#16171A] p-2 shadow-[0_35px_100px_rgba(0,0,0,0.65)];
+    border-radius: 2.65rem;
+  }
+
+  .device-frame::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 0.7rem;
+    z-index: 2;
+    width: 32%;
+    height: 0.95rem;
+    transform: translateX(-50%);
+    border-radius: 999px;
+    background: #050506;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04);
+  }
+
+  .device-screen {
+    @apply aspect-[9/19.5] overflow-hidden bg-black;
+    border-radius: 2.2rem;
+  }
+
+  .mobile-nav-enter {
+    transform-origin: top center;
+    animation: mobile-nav-enter 340ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .mobile-nav-backdrop {
+    animation: mobile-nav-backdrop 240ms ease-out both;
+  }
+
+  .nav-icon-enter {
+    animation: nav-icon-enter 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .ambient-float {
+    animation: ambient-float 7s ease-in-out infinite;
+  }
+
+  .ambient-float-delayed {
+    animation: ambient-float 8s ease-in-out 1.2s infinite reverse;
+  }
+}
+
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root) {
+  animation: page-exit 180ms ease both;
+}
+
+::view-transition-new(root) {
+  animation: page-enter 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes content-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes page-exit {
+  to {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes screen-swap {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+    filter: blur(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes screen-copy-enter {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes mobile-nav-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes mobile-nav-backdrop {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes nav-icon-enter {
+  from {
+    opacity: 0;
+    transform: rotate(-24deg) scale(0.78);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(0) scale(1);
+  }
+}
+
+@keyframes ambient-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@media (max-width: 767px) {
+  section p:not(.eyebrow):not(.mobile-centred-note),
+  section li,
+  article p,
+  article li,
+  footer p {
+    text-align: left;
+  }
+
+  footer a,
+  nav a,
+  [role="tab"],
+  .tap-target {
+    min-height: 44px;
+  }
+
+  .motion-ready [data-reveal] {
+    transform: translate3d(0, 14px, 0);
+    transition-duration: 480ms;
+  }
+
+  .motion-ready [data-reveal="scale"] {
+    transform: translate3d(0, 12px, 0) scale(0.985);
+  }
+
+  .motion-ready [data-reveal="left"],
+  .motion-ready [data-reveal="right"] {
+    transform: translate3d(0, 14px, 0);
+  }
+
+  button:active,
+  a[class*="rounded"]:active {
+    transform: scale(0.975);
+    transition-duration: 90ms;
+  }
+
+  .ambient-float,
+  .ambient-float-delayed {
+    animation-duration: 10s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+
+  .motion-ready [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
