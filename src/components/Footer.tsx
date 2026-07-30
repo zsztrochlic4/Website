@@ -6,11 +6,9 @@ const Footer = () => {
       <div className="container flex flex-col gap-8 xl:flex-row xl:items-end xl:justify-between" data-reveal>
         <div>
           <img
-            src="/strengthhub-logo-960.png"
+            src="/logo.png"
             alt="StrengthHub Online"
-            width={960}
-            height={180}
-            className="block h-auto w-[240px] max-w-full"
+            className="block h-9 w-auto max-w-full"
             loading="lazy"
           />
           <p className="mt-3 max-w-md text-sm leading-relaxed text-white/[0.38]">An Australian fitness and wellbeing platform for students and young adults, delivered with universities, organisations, health and wellbeing brands, and gyms.</p>
