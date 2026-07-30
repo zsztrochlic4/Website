@@ -1,31 +1,17 @@
 import { useEffect } from 'react';
 
-/**
- * Drives the scroll reveal animations defined in index.css.
- *
- * The stylesheet keeps `[data-reveal]` elements hidden only while the root
- * carries the `motion-ready` class, so that class is added from JavaScript to
- * guarantee content is always visible as a no-JS / no-observer fallback.
- * Each `[data-reveal]` element is revealed by adding `is-visible` once it
- * scrolls into view.
- */
-export default function useScrollAnimation() {
+const useScrollAnimation = (routeKey?: unknown): void => {
   useEffect(() => {
     const root = document.documentElement;
-
-    // Respect users who prefer reduced motion: reveal everything immediately.
-    const prefersReducedMotion = window.matchMedia(
-      '(prefers-reduced-motion: reduce)',
-    ).matches;
-
-    if (prefersReducedMotion || !('IntersectionObserver' in window)) {
-      document
-        .querySelectorAll('[data-reveal]')
-        .forEach((el) => el.classList.add('is-visible'));
-      return;
-    }
+    const elements = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'));
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     root.classList.add('motion-ready');
+
+    if (reducedMotion || !('IntersectionObserver' in window)) {
+      elements.forEach((element) => element.classList.add('is-visible'));
+      return;
+    }
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -36,12 +22,33 @@ export default function useScrollAnimation() {
           }
         });
       },
-      { threshold: 0.12, rootMargin: '0px 0px -8% 0px' },
+      {
+        threshold: 0.12,
+        rootMargin: '0px 0px -8% 0px',
+      }
     );
 
-    const elements = document.querySelectorAll('[data-reveal]');
-    elements.forEach((el) => observer.observe(el));
+    elements.forEach((element) => observer.observe(element));
 
-    return () => observer.disconnect();
-  }, []);
-}
+    // Safety net: guarantee anything already in the viewport is revealed even
+    // if the observer's first callback is delayed (e.g. during a navigation),
+    // so content can never stay stuck hidden against the dark background.
+    const revealInView = () => {
+      const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+      elements.forEach((element) => {
+        const rect = element.getBoundingClientRect();
+        if (rect.top < viewportHeight && rect.bottom > 0) {
+          element.classList.add('is-visible');
+        }
+      });
+    };
+    const rafId = window.requestAnimationFrame(revealInView);
+
+    return () => {
+      window.cancelAnimationFrame(rafId);
+      observer.disconnect();
+    };
+  }, [routeKey]);
+};
+
+export default useScrollAnimation;

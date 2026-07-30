@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Send, CheckCircle2, Loader2 } from 'lucide-react';
-import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { db, isFirebaseConfigured } from '../lib/firebase';
 
 type FormStatus = 'idle' | 'submitting' | 'success' | 'error';
 
@@ -18,21 +19,20 @@ const ContactForm = () => {
     setStatus('submitting');
     setErrorMsg('');
 
-    if (!isSupabaseConfigured) {
+    if (!isFirebaseConfigured || !db) {
       setErrorMsg('Form submissions are not configured yet. Please email us directly.');
       setStatus('error');
       return;
     }
 
     try {
-      const { error } = await supabase.from('contact_submissions').insert({
+      await addDoc(collection(db, 'contact_submissions'), {
         full_name: form.full_name.trim(),
         email: form.email.trim(),
         phone: form.phone.trim(),
         goals: form.goals.trim(),
+        created_at: serverTimestamp(),
       });
-
-      if (error) throw error;
 
       setStatus('success');
       setForm({ full_name: '', email: '', phone: '', goals: '' });

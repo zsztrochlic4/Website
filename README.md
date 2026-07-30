@@ -15,15 +15,22 @@ The dev server runs on http://localhost:5173.
 
 ## Environment variables
 
-The contact form submits to Supabase. Copy `.env.example` to `.env` and fill in:
+The contact form writes to Cloud Firestore. Copy `.env.example` to `.env` and
+fill in your Firebase web app config (Firebase console → Project settings →
+General → Your apps → Web app):
 
 ```
-VITE_SUPABASE_URL=...
-VITE_SUPABASE_ANON_KEY=...
+VITE_FIREBASE_API_KEY=...
+VITE_FIREBASE_AUTH_DOMAIN=...
+VITE_FIREBASE_PROJECT_ID=...
+VITE_FIREBASE_STORAGE_BUCKET=...
+VITE_FIREBASE_MESSAGING_SENDER_ID=...
+VITE_FIREBASE_APP_ID=...
 ```
 
-The site builds and runs without these; the contact form just reports that it is
-not configured until they are provided.
+These are not secrets; access is controlled by `firestore.rules`. The site
+builds and runs without them; the contact form just reports that it is not
+configured until they are provided.
 
 ## Project structure
 
