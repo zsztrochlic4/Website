@@ -8,18 +8,23 @@ import { type ReactNode } from 'react';
 const linkClass =
   'font-semibold text-[#9FE264] underline decoration-[#7ED957]/40 underline-offset-4 transition hover:text-white';
 
-const INLINE_PATTERN =
+// NOTE: this regex uses the global flag and is stateful (lastIndex). Because
+// renderInline is recursive (bold text and link labels are parsed again), each
+// call MUST have its own regex instance — a shared module-level regex would have
+// its lastIndex reset by the recursion, causing the outer loop to rescan the
+// same token forever (an infinite loop that freezes the browser tab).
+const createInlinePattern = () =>
   /\*\*([^*]+)\*\*|\[([^\]]+)\]\(([^)]+)\)|([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})/g;
 
 /** Parse inline Markdown (bold, links, bare emails) into React nodes. */
 export function renderInline(text: string, keyPrefix = 'i'): ReactNode[] {
   const nodes: ReactNode[] = [];
+  const pattern = createInlinePattern();
   let lastIndex = 0;
   let count = 0;
   let match: RegExpExecArray | null;
 
-  INLINE_PATTERN.lastIndex = 0;
-  while ((match = INLINE_PATTERN.exec(text)) !== null) {
+  while ((match = pattern.exec(text)) !== null) {
     if (match.index > lastIndex) {
       nodes.push(text.slice(lastIndex, match.index));
     }
@@ -55,7 +60,7 @@ export function renderInline(text: string, keyPrefix = 'i'): ReactNode[] {
       );
     }
 
-    lastIndex = INLINE_PATTERN.lastIndex;
+    lastIndex = pattern.lastIndex;
   }
 
   if (lastIndex < text.length) {
