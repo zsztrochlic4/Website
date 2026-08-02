@@ -19,6 +19,8 @@ const Footer = () => {
           <a href="tel:0435754525" className="-mx-2 inline-flex min-h-11 items-center gap-2 rounded-lg px-2 py-2 transition hover:bg-white/[0.04] hover:text-white"><Phone className="h-4 w-4" /> 0435 754 525</a>
           <a href="https://strengthhubonline.app" target="_blank" rel="noopener noreferrer" className="-mx-2 inline-flex min-h-11 items-center gap-2 rounded-lg px-2 py-2 transition hover:bg-white/[0.04] hover:text-white">Try the app <ExternalLink className="h-4 w-4" /></a>
           <a href="/privacy" className="-mx-2 inline-flex min-h-11 items-center rounded-lg px-2 py-2 transition hover:bg-white/[0.04] hover:text-white">Privacy Policy</a>
+          <a href="/terms" className="-mx-2 inline-flex min-h-11 items-center rounded-lg px-2 py-2 transition hover:bg-white/[0.04] hover:text-white">Terms of Use</a>
+          <a href="/health-safety" className="-mx-2 inline-flex min-h-11 items-center rounded-lg px-2 py-2 transition hover:bg-white/[0.04] hover:text-white">Health &amp; Safety</a>
         </div>
       </div>
 

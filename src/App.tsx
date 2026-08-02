@@ -8,27 +8,37 @@ import TheStudio from "./components/TheStudio";
 import MeetTheCoach from "./components/MeetTheCoach";
 import ContactForm from "./components/ContactForm";
 import Footer from "./components/Footer";
-import PrivacyPolicy from "./components/PrivacyPolicy";
+import LegalDocument from "./components/LegalDocument";
 import HomeSections from "./components/HomeSections";
 import NotFound from "./components/NotFound";
 import StickyMobileCta from "./components/StickyMobileCta";
 import useScrollAnimation from "./hooks/useScrollAnimation";
+import { legalDocsBySlug, type LegalSlug } from "./content/legal";
 
 const normalizePath = (pathname: string) => pathname.replace(/\/+$/, '') || '/';
+
+function legalPage(slug: LegalSlug): { title: string; node: ReactNode } {
+  const doc = legalDocsBySlug[slug];
+  return {
+    title: doc.documentTitle,
+    node: (
+      <>
+        <Navbar />
+        <LegalDocument slug={slug} />
+        <Footer />
+      </>
+    ),
+  };
+}
 
 function renderPage(path: string): { title: string; node: ReactNode } {
   switch (path) {
     case '/privacy':
-      return {
-        title: 'Privacy Policy | StrengthHub Online',
-        node: (
-          <>
-            <Navbar />
-            <PrivacyPolicy />
-            <Footer />
-          </>
-        ),
-      };
+      return legalPage('privacy');
+    case '/terms':
+      return legalPage('terms');
+    case '/health-safety':
+      return legalPage('health-safety');
     case '/platform':
       return {
         title: 'Platform | StrengthHub Online',
