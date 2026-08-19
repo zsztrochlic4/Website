@@ -8,8 +8,8 @@ import { type ReactNode } from 'react';
 const linkClass =
   'font-semibold text-[#9FE264] underline decoration-[#7ED957]/40 underline-offset-4 transition hover:text-white';
 
-const INLINE_PATTERN =
-  /\*\*([^*]+)\*\*|\[([^\]]+)\]\(([^)]+)\)|([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})/g;
+const INLINE_PATTERN_SOURCE =
+  '\\*\\*([^*]+)\\*\\*|\\[([^\\]]+)\\]\\(([^)]+)\\)|([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,})';
 
 /** Parse inline Markdown (bold, links, bare emails) into React nodes. */
 export function renderInline(text: string, keyPrefix = 'i'): ReactNode[] {
@@ -18,8 +18,11 @@ export function renderInline(text: string, keyPrefix = 'i'): ReactNode[] {
   let count = 0;
   let match: RegExpExecArray | null;
 
-  INLINE_PATTERN.lastIndex = 0;
-  while ((match = INLINE_PATTERN.exec(text)) !== null) {
+  // A fresh regex per call: renderInline recurses (e.g. for bold content), and a
+  // shared /g regex's lastIndex would be clobbered by the inner call, restarting
+  // the outer loop forever (freezes the page). A local instance keeps state local.
+  const pattern = new RegExp(INLINE_PATTERN_SOURCE, 'g');
+  while ((match = pattern.exec(text)) !== null) {
     if (match.index > lastIndex) {
       nodes.push(text.slice(lastIndex, match.index));
     }
@@ -55,7 +58,7 @@ export function renderInline(text: string, keyPrefix = 'i'): ReactNode[] {
       );
     }
 
-    lastIndex = INLINE_PATTERN.lastIndex;
+    lastIndex = pattern.lastIndex;
   }
 
   if (lastIndex < text.length) {
