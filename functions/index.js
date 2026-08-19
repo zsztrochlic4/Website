@@ -7,10 +7,10 @@ import * as logger from 'firebase-functions/logger';
 // repository secrets); the fallbacks keep local reasoning obvious.
 //
 // IMPORTANT: a v2 Firestore trigger must run in the same region as the
-// Firestore database. Melbourne projects are usually australia-southeast1
-// (Sydney) or australia-southeast2 (Melbourne) — set FUNCTION_REGION to match
-// your database's location (Firebase console → Firestore Database shows it).
-const REGION = process.env.FUNCTION_REGION || 'australia-southeast1';
+// Firestore database. This project's (default) database is in
+// australia-southeast2 (Melbourne), so that is the default here. Override with
+// a FUNCTION_REGION env var / repo secret only if the database is ever moved.
+const REGION = process.env.FUNCTION_REGION || 'australia-southeast2';
 const NOTIFY_EMAIL = process.env.NOTIFY_EMAIL || 'zsztrochlic4@gmail.com';
 const RESEND_FROM = process.env.RESEND_FROM || 'StrengthHub Online <onboarding@resend.dev>';
 

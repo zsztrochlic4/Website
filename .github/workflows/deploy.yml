@@ -18,7 +18,7 @@ name: Deploy to Firebase
 #   RESEND_API_KEY   – required for emails to send (from https://resend.com)
 #   NOTIFY_EMAIL     – optional, defaults to zsztrochlic4@gmail.com
 #   RESEND_FROM      – optional, defaults to "StrengthHub Online <onboarding@resend.dev>"
-#   FUNCTION_REGION  – optional, defaults to australia-southeast1 (must match the
+#   FUNCTION_REGION  – optional, defaults to australia-southeast2 (must match the
 #                      Firestore database's region)
 
 on:
