@@ -9,8 +9,10 @@ import * as logger from 'firebase-functions/logger';
 // IMPORTANT: a v2 Firestore trigger must run in the same region as the
 // Firestore database. This project's (default) database is in
 // australia-southeast2 (Melbourne), so that is the default here. Override with
-// a FUNCTION_REGION env var / repo secret only if the database is ever moved.
-const REGION = process.env.FUNCTION_REGION || 'australia-southeast2';
+// a DEPLOY_REGION env var / repo secret only if the database is ever moved.
+// (FUNCTION_* keys are reserved by the Cloud Functions runtime, so we can't
+// use FUNCTION_REGION here.)
+const REGION = process.env.DEPLOY_REGION || 'australia-southeast2';
 const NOTIFY_EMAIL = process.env.NOTIFY_EMAIL || 'zsztrochlic4@gmail.com';
 const RESEND_FROM = process.env.RESEND_FROM || 'StrengthHub Online <onboarding@resend.dev>';
 

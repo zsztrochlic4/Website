@@ -18,8 +18,8 @@ name: Deploy to Firebase
 #   RESEND_API_KEY   – required for emails to send (from https://resend.com)
 #   NOTIFY_EMAIL     – optional, defaults to zsztrochlic4@gmail.com
 #   RESEND_FROM      – optional, defaults to "StrengthHub Online <onboarding@resend.dev>"
-#   FUNCTION_REGION  – optional, defaults to australia-southeast2 (must match the
-#                      Firestore database's region)
+#   DEPLOY_REGION    – optional, defaults to australia-southeast2 (must match the
+#                      Firestore database's region; FUNCTION_* keys are reserved)
 
 on:
   push:
@@ -70,13 +70,13 @@ jobs:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           NOTIFY_EMAIL: ${{ secrets.NOTIFY_EMAIL }}
           RESEND_FROM: ${{ secrets.RESEND_FROM }}
-          FUNCTION_REGION: ${{ secrets.FUNCTION_REGION }}
+          DEPLOY_REGION: ${{ secrets.DEPLOY_REGION }}
         run: |
           {
             echo "RESEND_API_KEY=${RESEND_API_KEY}"
             echo "NOTIFY_EMAIL=${NOTIFY_EMAIL}"
             echo "RESEND_FROM=${RESEND_FROM}"
-            echo "FUNCTION_REGION=${FUNCTION_REGION}"
+            echo "DEPLOY_REGION=${DEPLOY_REGION}"
           } > functions/.env
 
       - name: Write service-account credentials
