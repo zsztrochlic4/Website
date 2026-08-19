@@ -1,0 +1,6 @@
+node_modules/
+# Runtime config written by the deploy workflow from repository secrets.
+.env
+.env.*
+*.local
+firebase-debug.log

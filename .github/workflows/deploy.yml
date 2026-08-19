@@ -1,21 +1,25 @@
-name: Deploy to Firebase Hosting
+name: Deploy to Firebase
 
-# Builds the Vite site and deploys it to Firebase Hosting (project website-b41f4).
-# Runs automatically on every push to main, and can be triggered manually from
-# the Actions tab (Run workflow).
+# Builds the Vite site and deploys hosting + Firestore rules/indexes + the
+# contact-form Cloud Function to Firebase (project website-b41f4). Runs on every
+# push to main and can be triggered manually from the Actions tab.
 #
 # Required repository secret:
-#   FIREBASE_SERVICE_ACCOUNT  – the full JSON key of a service account with the
-#                               "Firebase Hosting Admin" role on website-b41f4.
+#   FIREBASE_SERVICE_ACCOUNT  – full JSON key of a service account on
+#                               website-b41f4. For hosting + rules it needs the
+#                               "Firebase Admin" role; to also deploy the Cloud
+#                               Function grant it "Editor" (see README/deploy notes).
 #
-# Optional repository secrets (only needed for the contact form to work on the
-# deployed site — these values ship in the client bundle and are not secrets in
-# the security sense; access is controlled by firestore.rules):
+# Contact-form build config (site) — add these so the form can write to Firestore:
 #   VITE_FIREBASE_API_KEY, VITE_FIREBASE_AUTH_DOMAIN, VITE_FIREBASE_PROJECT_ID,
-#   VITE_FIREBASE_STORAGE_BUCKET, VITE_FIREBASE_MESSAGING_SENDER_ID,
-#   VITE_FIREBASE_APP_ID
-# If they are absent the site still builds; the contact form just reports that
-# it is not configured.
+#   VITE_FIREBASE_STORAGE_BUCKET, VITE_FIREBASE_MESSAGING_SENDER_ID, VITE_FIREBASE_APP_ID
+#
+# Email notification (Cloud Function):
+#   RESEND_API_KEY   – required for emails to send (from https://resend.com)
+#   NOTIFY_EMAIL     – optional, defaults to zsztrochlic4@gmail.com
+#   RESEND_FROM      – optional, defaults to "StrengthHub Online <onboarding@resend.dev>"
+#   FUNCTION_REGION  – optional, defaults to australia-southeast1 (must match the
+#                      Firestore database's region)
 
 on:
   push:
@@ -26,8 +30,11 @@ permissions:
   contents: read
 
 concurrency:
-  group: firebase-hosting-live
+  group: firebase-deploy-live
   cancel-in-progress: true
+
+env:
+  FIREBASE_PROJECT: website-b41f4
 
 jobs:
   deploy:
@@ -40,9 +47,10 @@ jobs:
           node-version: 20
           cache: npm
 
-      - run: npm ci
+      - name: Install site dependencies
+        run: npm ci
 
-      - name: Build
+      - name: Build site
         env:
           VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
           VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
@@ -52,10 +60,38 @@ jobs:
           VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
         run: npm run build
 
-      - name: Deploy to Firebase Hosting (live channel)
-        uses: FirebaseExtended/action-hosting-deploy@v0
-        with:
-          repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          channelId: live
-          projectId: website-b41f4
+      - name: Write Cloud Function runtime config
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          NOTIFY_EMAIL: ${{ secrets.NOTIFY_EMAIL }}
+          RESEND_FROM: ${{ secrets.RESEND_FROM }}
+          FUNCTION_REGION: ${{ secrets.FUNCTION_REGION }}
+        run: |
+          {
+            echo "RESEND_API_KEY=${RESEND_API_KEY}"
+            echo "NOTIFY_EMAIL=${NOTIFY_EMAIL}"
+            echo "RESEND_FROM=${RESEND_FROM}"
+            echo "FUNCTION_REGION=${FUNCTION_REGION}"
+          } > functions/.env
+
+      - name: Write service-account credentials
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/gha-sa.json"
+
+      - name: Deploy hosting + Firestore rules
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/gha-sa.json
+        run: npx --yes firebase-tools@13 deploy --only hosting,firestore --project "$FIREBASE_PROJECT" --non-interactive
+
+      - name: Deploy contact-form Cloud Function
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/gha-sa.json
+        # Best-effort: a missing Blaze plan, IAM role, or RESEND_API_KEY should
+        # not block the site from deploying. Fix the cause, then re-run.
+        continue-on-error: true
+        run: npx --yes firebase-tools@13 deploy --only functions --project "$FIREBASE_PROJECT" --non-interactive --force
+
+      - name: Clean up credentials
+        if: always()
+        run: rm -f "$RUNNER_TEMP/gha-sa.json" functions/.env
