@@ -32,11 +32,11 @@ const MeetTheCoach = () => {
             <div className="absolute -inset-6 rounded-[2.5rem] bg-[#7ED957]/[0.08] blur-[55px]" />
             <div className="relative overflow-hidden rounded-[1.8rem] border border-white/10 bg-[#121214]">
               <img
-                src="/founder-zak-upright.jpg"
+                src="/founder-zak-upright.webp"
                 alt="Zak Sztrochlic, founder of StrengthHub Online"
-                width={900}
-                height={1200}
-                className="h-[360px] w-full object-cover object-[35%_center] sm:h-[520px]"
+                width={514}
+                height={676}
+                className="h-[360px] w-full object-cover object-[50%_25%] sm:h-[520px]"
                 decoding="async"
               />
               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/70 to-transparent p-6 pt-20">
