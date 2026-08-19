@@ -60,6 +60,11 @@ jobs:
           VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
         run: npm run build
 
+      - name: Install Cloud Function dependencies
+        # The Firebase CLI loads functions/index.js to analyze triggers before
+        # deploying, so firebase-functions must be installed in functions/.
+        run: npm --prefix functions ci
+
       - name: Write Cloud Function runtime config
         env:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
